@@ -1,4 +1,4 @@
 secrets.py
 Album_Collection.sqlite
 secrets.py
-cache.json
+__pycache__

@@ -54,7 +54,7 @@ def make_url_request_with_caching(url, cache):
 
 
 def scrape_genres(cache):
-    ''' Returns a list of genre options to the user from "https://www.udiscovermusic.com/udiscover-genres/"
+    ''' Returns a dictionary of genre options to the user from "https://www.udiscovermusic.com/udiscover-genres/"
     
     Parameters
     ----------
@@ -63,8 +63,7 @@ def scrape_genres(cache):
     Returns
     -------
     dict
-        key is index number and value is genre
-        e.g. {1: 'Blues', 2: 'Classical', etc.}
+        key is genre and value is genre link
     '''
     page = make_url_request_with_caching('https://www.udiscovermusic.com/udiscover-genres/', cache)
     soup = BeautifulSoup(page, 'html.parser')
@@ -90,7 +89,7 @@ def scrape_genres(cache):
     return return_genre_dict
 
 def get_genre_articles(dictionary, genre, cache):
-    ''' Returns a list of articles to the user from "https://www.udiscovermusic.com/udiscover-genres/"
+    ''' Returns a dictionary of articles to the user from "https://www.udiscovermusic.com/udiscover-genres/"
     
     Parameters
     ----------
@@ -98,6 +97,9 @@ def get_genre_articles(dictionary, genre, cache):
 
     Returns
     -------
+    dict
+        key is genre headline and value is genre link
+
     '''
     site_url = dictionary[genre]
     page = make_url_request_with_caching(site_url, cache)
@@ -118,7 +120,7 @@ def get_genre_articles(dictionary, genre, cache):
     return genre_headlines_dict
 
 def spotify_authorization_request():
-    ''' Returns a list of results from spotify API
+    ''' Returns a token that allows access to the spotify API
 
     Parameters
     ----------
@@ -126,8 +128,8 @@ def spotify_authorization_request():
 
     Returns
     -------
-    list
-        recommendations based on the seed genre provided by the user
+    string
+        token that allows access to the spotify API 
     '''
     # spotify requires authorization to utilize API. I am issuing authorization based on my client ID and client secret, not an individual user authorization flow
     auth_str = '{}:{}'.format(secrets.CLIENT_ID, secrets.CLIENT_SECRET)
@@ -152,16 +154,16 @@ def spotify_authorization_request():
     return(access_token)
 
 def spotify_api_request(access_token, genre):
-    ''' Returns a list of results from spotify API
+    ''' Prints a list of the top ten results from spotify API
+    Additionally, adds each result to the SQL database
 
     Parameters
     ----------
-    None
+    access token from spotify authorization
+    genre option chosen by user
 
     Returns
     -------
-    list
-        recommendations based on the seed genre provided by the user
     '''
 
     headers = {
@@ -209,6 +211,7 @@ def spotify_api_request(access_token, genre):
         print('----------------------')
 
 def genre_options(cache):
+    #prints genre options for the user
      genre_dict = scrape_genres(cache)
      index = 0
      
@@ -227,7 +230,6 @@ def genre_options(cache):
     
 def article_options(article_dictionary):
     #prints article options
-
     for key in article_dictionary.keys():
         print(key, ": ", article_dictionary[key][0])
 
@@ -243,7 +245,7 @@ def article_options(article_dictionary):
         webbrowser.open_new(article_website)
 
 def create_sql_table():
-
+    #creates SQL table with album schema
     connection = sqlite3.connect("Album_Collection.sqlite")
     cursor = connection.cursor()
     sql = "CREATE TABLE ALBUMS(album_name , artist_name , release_date , spotify_link )"
@@ -252,6 +254,7 @@ def create_sql_table():
     connection.close()
 
 def user_interface():
+    # main user interface function!
 
     CACHE_DICT = load_cache()
 
@@ -292,7 +295,6 @@ def user_interface():
 
     elif (intial_input == 'albums'):
         #goes to database program exploration
-        print('In albums')
         albums_input = input('Search our database by `album name` or `artist name`: ')
         if (albums_input == 'album name'):
             album_name = input('Search an album name, will return the first result or not available: ')

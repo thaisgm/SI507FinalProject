@@ -316,7 +316,7 @@ def user_interface():
             #search database for artist name
             connection = sqlite3.connect("Album_Collection.sqlite")
             cursor = connection.cursor()
-            query = "SELECT * FROM ALBUMS WHERE album_name = '" + artist_name + "' "
+            query = "SELECT * FROM ALBUMS WHERE artist_name = '" + artist_name + "' "
             result = cursor.execute(query).fetchone()
             connection.close()
             listen_input = input('We found the album ' + result[0] + ' by ' + result[1] + ' released ' + result[2] + '. Would you like to listen? `yes` or `exit`: ')
